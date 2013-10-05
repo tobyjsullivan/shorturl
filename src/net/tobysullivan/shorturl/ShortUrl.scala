@@ -47,16 +47,21 @@ object ShortUrl {
   }
 
   def statsFor(hash: String): Map[String, Any] = {
-    // TODO
-    Map[String, Any]()
+    val hashAsInt = intFromHash(hash)
+    
+    Map[String, Any]("clicks" -> getClicksForHash(hashAsInt))
+  }
+  
+  private def getClicksForHash(hash: Int): Int = {
+    val lookupRecord = Await.result(recordLookupAgent.future, 2 seconds)
+    
+    lookupRecord.getOrElse(hash, 0)
   }
   
   private val cursor = Agent(0)
   private def getNextCursor(): Int = {
-    this.synchronized {
-	    cursor send (_ + 1)
-	    Await.result(cursor.future, 1 second)
-    }
+    val future = cursor alter (_ + 1)
+    Await.result(future, 1 second)
   }
   
   private val hashToUrlMapAgent = Agent(hashToUrlMap)

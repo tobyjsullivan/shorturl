@@ -111,6 +111,19 @@ class ShortUrlSpec extends FlatSpec {
     
     active.foreach(thread => thread.join())
   }
+  
+  "statsFor" should "no clicks on a new hash" in {
+    // Setup a hash
+    val hash = ShortUrl.hashUrl("http://www." + RandomStrings.gen(8) + ".net/")
+    
+    val stats = ShortUrl.statsFor(hash)
+    
+    val clicks = stats.get("clicks")
+    
+    assert(clicks.isDefined)
+    
+    assert(clicks.get == 0)
+  }
 }
 
 object RandomStrings {
