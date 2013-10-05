@@ -128,18 +128,20 @@ object ShortUrl {
   // We use this implicit conversion to help us increment record lookups
   implicit def LookupRecordMapWrapper(m: HashMap[Int, Int]) = new HashMap[Int, Int] {
     def increment(key: Int): HashMap[Int, Int] = {
-        if(m.contains(key)) {
-	        m.map { kv =>
-	          if(kv._1 == key) { 
-		          (kv._1, kv._2 + 1) 
-		        } else { 
-		          (kv._1, kv._2)
-		        }
-	        }
-        } else {
-          m + Tuple2(key, 1)
-        }
-	  }
+      if(!m.contains(key)) {
+        // This hash has never been looked up before
+        m + Tuple2(key, 1)
+      } else {
+        // Increment an existing count
+	    m.map { kv =>
+	      if(kv._1 == key) { 
+		    (kv._1, kv._2 + 1) 
+		  } else { 
+		    (kv._1, kv._2)
+		  }
+	    }
+      }
+	}
   }
   
   private val recordLookupAgent = Agent(HashMap[Int, Int]())
