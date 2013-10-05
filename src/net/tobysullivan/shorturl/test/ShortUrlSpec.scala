@@ -92,13 +92,13 @@ class ShortUrlSpec extends FlatSpec {
   }
   
   it should "round-trip a large number of hashes concurrently without failing" in {
-    val numThreads = 10000;
+    val numThreads = 1000;
     val active = new ArraySeq[Thread](numThreads)
     
     var lastThread = System.currentTimeMillis()
     for(i <- 0 to (numThreads - 1)) {
       // We want to create a lot of threads but limit to 1000/second to avoid memory issues.
-      if (lastThread == System.currentTimeMillis()) {
+      if (numThreads > 1000 && lastThread == System.currentTimeMillis()) {
     	  Thread.sleep(1)
       }
       
@@ -112,17 +112,34 @@ class ShortUrlSpec extends FlatSpec {
     active.foreach(thread => thread.join())
   }
   
-  "statsFor" should "no clicks on a new hash" in {
-    // Setup a hash
+  "statsFor" should "return 0 clicks on a new hash" in {
     val hash = ShortUrl.hashUrl("http://www." + RandomStrings.gen(8) + ".net/")
     
     val stats = ShortUrl.statsFor(hash)
     
-    val clicks = stats.get("clicks")
+    val clicks = stats.get(ShortUrl.STATS_CLICKS)
     
     assert(clicks.isDefined)
     
     assert(clicks.get == 0)
+  }
+  
+  "statsFor" should "return correct number of clicks for a hash" in {
+    val hash = ShortUrl.hashUrl("http://www." + RandomStrings.gen(8) + ".biz")
+    
+    // Click/lookup several times
+    val numClicks = 25
+    for(i <- 1 to numClicks) {
+      val throwAway = ShortUrl.urlFromHash(hash)
+    }
+    
+    val stats = ShortUrl.statsFor(hash)
+    
+    val clicks = stats.get(ShortUrl.STATS_CLICKS)
+    
+    assert(clicks.isDefined)
+    
+    assert(clicks.get == numClicks)
   }
 }
 

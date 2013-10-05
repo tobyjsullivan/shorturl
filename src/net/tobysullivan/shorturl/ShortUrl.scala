@@ -1,22 +1,20 @@
 package net.tobysullivan.shorturl
 
-import scala.collection.mutable.HashMap
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt
 import akka.agent.Agent
 import scala.concurrent.Future
 import scala.concurrent._
+import scala.collection.immutable.HashMap
 
 
 object ShortUrl {
   // The available characters for producing a hash. Per the spec, we use a base 62 set
   val CHAR_MAP = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     
-  // Internally, we store and process hashes as ints for better efficiency
-  val hashToUrlMap = HashMap[Int, String]()
-  val lookupRecord = HashMap[Int, Int]()
-  
+  val STATS_CLICKS = "clicks"
+    
   def hashUrl(url: String): String = {
     // Check for an existing hash to avoid putting in duplicates.
     val possibleExisting = Await.result(reverseLookupUrlInMap(url), 2 seconds);
@@ -49,13 +47,20 @@ object ShortUrl {
   def statsFor(hash: String): Map[String, Any] = {
     val hashAsInt = intFromHash(hash)
     
-    Map[String, Any]("clicks" -> getClicksForHash(hashAsInt))
+    Map[String, Any](STATS_CLICKS -> getClicksForHash(hashAsInt))
   }
   
   private def getClicksForHash(hash: Int): Int = {
     val lookupRecord = Await.result(recordLookupAgent.future, 2 seconds)
     
-    lookupRecord.getOrElse(hash, 0)
+    val count = lookupRecord.get(hash)
+    
+    if(count.isEmpty) {
+      println("count for " + hashFromInt(hash) +  " not defined")
+      0
+    } else {
+      count.get
+    }
   }
   
   private val cursor = Agent(0)
@@ -64,9 +69,9 @@ object ShortUrl {
     Await.result(future, 1 second)
   }
   
-  private val hashToUrlMapAgent = Agent(hashToUrlMap)
+  private val hashToUrlMapAgent = Agent(HashMap[Int, String]())
   private def addUrlHashPairToMap(hash: Int, url: String) {
-    hashToUrlMapAgent send (_ += Tuple2(hash, url))
+    hashToUrlMapAgent send (_ + Tuple2(hash, url))
   }
   
   private def findUrlByHashInMap(hash: Int): Option[String] = {
@@ -119,8 +124,26 @@ object ShortUrl {
     out.reverse
   }
   
-  private val recordLookupAgent = Agent(lookupRecord)
+  
+  // We use this implicit conversion to help us increment record lookups
+  implicit def LookupRecordMapWrapper(m: HashMap[Int, Int]) = new HashMap[Int, Int] {
+    def increment(key: Int): HashMap[Int, Int] = {
+        if(m.contains(key)) {
+	        m.map { kv =>
+	          if(kv._1 == key) { 
+		          (kv._1, kv._2 + 1) 
+		        } else { 
+		          (kv._1, kv._2)
+		        }
+	        }
+        } else {
+          m + Tuple2(key, 1)
+        }
+	  }
+  }
+  
+  private val recordLookupAgent = Agent(HashMap[Int, Int]())
   private def recordHashLookup(hash: Int) {
-    recordLookupAgent sendOff (_ transform { (curHash, count) => if(curHash == hash) { count + 1 } else { count } })
+    recordLookupAgent send (_ increment hash)
   }
 }
