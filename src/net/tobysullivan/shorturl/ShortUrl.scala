@@ -53,8 +53,10 @@ object ShortUrl {
   
   private val cursor = Agent(0)
   private def getNextCursor(): Int = {
-    cursor send (_ + 1)
-    Await.result(cursor.future, 1 second)
+    this.synchronized {
+	    cursor send (_ + 1)
+	    Await.result(cursor.future, 1 second)
+    }
   }
   
   private val hashToUrlMapAgent = Agent(hashToUrlMap)
@@ -69,7 +71,7 @@ object ShortUrl {
   
   private def reverseLookupUrlInMap(url: String): Future[Option[Int]] = {
     future {
-      val map = Await.result(hashToUrlMapAgent.future, 1 second)
+      val map = Await.result(hashToUrlMapAgent.future, 2 seconds)
       val hit = map.find(kv => { 
         (kv._2 == url)
       })

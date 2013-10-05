@@ -92,13 +92,21 @@ class ShortUrlSpec extends FlatSpec {
   }
   
   it should "round-trip a large number of hashes concurrently without failing" in {
-    val numThreads = 1000;
+    val numThreads = 10000;
     val active = new ArraySeq[Thread](numThreads)
     
+    var lastThread = System.currentTimeMillis()
     for(i <- 0 to (numThreads - 1)) {
+      // We want to create a lot of threads but limit to 1000/second to avoid memory issues.
+      if (lastThread == System.currentTimeMillis()) {
+    	  Thread.sleep(1)
+      }
+      
       val thread = new Thread(new HashRoundTripper, "roundtrip-"+i)
       thread.start
       active.update(i, thread)
+      
+      lastThread = System.currentTimeMillis()
     }
     
     active.foreach(thread => thread.join())
@@ -128,12 +136,6 @@ class HashRoundTripper extends Runnable {
     val hash = ShortUrl.hashUrl(inputUrl)
     
     val resultUrl = ShortUrl.urlFromHash(hash)
-    
-    if(inputUrl != resultUrl) {
-    	println(hash)
-    	println(inputUrl)
-    	println(resultUrl)
-    }
     
     assert(inputUrl == resultUrl)
   }
