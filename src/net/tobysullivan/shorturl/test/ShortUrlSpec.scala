@@ -8,9 +8,9 @@ import java.security.SecureRandom
 import scala.collection.mutable.ArraySeq
 
 class ShortUrlSpec extends FlatSpec {
-  "charMap" should "have 64 available characters" in {
+  "CHAR_MAP" should "have 62 available characters" in {
     val mapSize = ShortUrl.CHAR_MAP.length()
-    assert(mapSize == 64)
+    assert(mapSize == 62)
   }
   
   it should "not have any duplicate characters" in {
@@ -61,12 +61,24 @@ class ShortUrlSpec extends FlatSpec {
     val active = new ArraySeq[Thread](numThreads)
     
     for(i <- 0 to (numThreads - 1)) {
-      val thread = new Thread(new HashCreator)
+      val thread = new Thread(new HashCreator, "create-"+i)
       thread.start
       active.update(i, thread)
     }
     
     active.foreach(thread => thread.join())
+  }
+  
+  "urlFromHash"  should "produce the original url many times" in {
+    for(i <- 1 to 1000) {
+      val inputUrl = "http://" + RandomStrings.gen(8) + ".com"
+      
+      val hash = ShortUrl.hashUrl(inputUrl)
+      
+      val retVal = ShortUrl.urlFromHash(hash)
+      
+      assert(retVal == inputUrl)
+    }
   }
   
   "urlFromHash" should "produce the original url" in {
@@ -77,6 +89,19 @@ class ShortUrlSpec extends FlatSpec {
     
     val retVal = ShortUrl.urlFromHash(hash)
     assert(retVal == inputUrl)
+  }
+  
+  it should "round-trip a large number of hashes concurrently without failing" in {
+    val numThreads = 1000;
+    val active = new ArraySeq[Thread](numThreads)
+    
+    for(i <- 0 to (numThreads - 1)) {
+      val thread = new Thread(new HashRoundTripper, "roundtrip-"+i)
+      thread.start
+      active.update(i, thread)
+    }
+    
+    active.foreach(thread => thread.join())
   }
 }
 
@@ -91,6 +116,25 @@ object RandomStrings {
 class HashCreator extends Runnable {
   def run {
     val hash = ShortUrl.hashUrl(RandomStrings.gen(14) + ".net")
-    // println(hash)
+    
+    assert(hash.length() > 0)
+  }
+} 
+
+class HashRoundTripper extends Runnable {
+  def run {
+    val inputUrl = "http://" + RandomStrings.gen(14) + ".org"
+    
+    val hash = ShortUrl.hashUrl(inputUrl)
+    
+    val resultUrl = ShortUrl.urlFromHash(hash)
+    
+    if(inputUrl != resultUrl) {
+    	println(hash)
+    	println(inputUrl)
+    	println(resultUrl)
+    }
+    
+    assert(inputUrl == resultUrl)
   }
 } 

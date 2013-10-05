@@ -10,9 +10,8 @@ import scala.concurrent._
 
 
 object ShortUrl {
-  // The available characters for producing a hash. The more characters we use, the shorter we can keep our hashes. However,
-  // it is important to strike a balance with usability. For example: short.url/ck&:*~al is probably not a very good hash.
-  val CHAR_MAP = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"
+  // The available characters for producing a hash. Per the spec, we use a base 62 set
+  val CHAR_MAP = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     
   // Internally, we store and process hashes as ints for better efficiency
   val hashToUrlMap = HashMap[Int, String]()
@@ -29,7 +28,8 @@ object ShortUrl {
 	  addUrlHashPairToMap(hashAsInt, url)
     }
     
-	hashFromInt(hashAsInt)
+	val hash = hashFromInt(hashAsInt)
+	hash
   }
 
   def urlFromHash(hash: String): String = {
@@ -51,7 +51,7 @@ object ShortUrl {
     Map[String, Any]()
   }
   
-  private val cursor = Agent(1)
+  private val cursor = Agent(0)
   private def getNextCursor(): Int = {
     cursor send (_ + 1)
     Await.result(cursor.future, 1 second)
@@ -86,8 +86,8 @@ object ShortUrl {
   private def intFromHash(hash: String): Int = {
     val mapSize = this.CHAR_MAP.size
     var out = 0
-     
-    for(curChar <- hash.reverse.toCharArray()) {
+    
+    for(curChar <- hash.toCharArray()) {
       out *= mapSize
       out += this.CHAR_MAP.indexOf(curChar)
     }
@@ -105,6 +105,10 @@ object ShortUrl {
       i /= mapSize
     }
     
+    // We could reverse the hash in either this function or the intFromHash(String) function.
+    // We choose to do it here to offer a decent distribution of hashes. E.i., they will be 
+    // produced in the order {..., aa, ba, ca, da, ...}.
+    // This could help if we opt to shard the DB.
     out.reverse
   }
   
