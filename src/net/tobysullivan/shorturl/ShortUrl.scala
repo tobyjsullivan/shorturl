@@ -31,21 +31,12 @@ object ShortUrl {
       hashAsInt = possibleExisting.get
     } else {
       // If this url has not been hashed yet, create a new hash
-	  hashAsInt = getNextAvailableHash()
+	  hashAsInt = AvailableHashManager.getNext()
 	  addUrlHashPairToMap(hashAsInt, url)
     }
     
 	val hash = hashFromInt(hashAsInt)
 	hash
-  }
-  
-  /**
-   * This method returns the next available hash as an Int in a thread-safe manner.
-   */
-  private val cursor = Agent(0)
-  private def getNextAvailableHash(): Int = {
-    val future = cursor alter (_ + 1)
-    Await.result(future, 1 second)
   }
   
   private val hashToUrlMapAgent = Agent(HashMap[Int, String]())
