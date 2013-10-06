@@ -1,13 +1,13 @@
 package net.tobysullivan.shorturl.test
 
 import org.scalatest.FlatSpec
-
 import net.tobysullivan.shorturl.DuplicateHashException
 import net.tobysullivan.shorturl.HashStore
+import net.tobysullivan.shorturl.AvailableHashManager
 
 class HashStoreSpec extends FlatSpec {
 	"addHashUrlPair" should "not fail to add a pair with a unique hash" in {
-	  val hash = HashStore.findNextAvailableHash
+	  val hash = AvailableHashManager.getNext
 	  
 	  val url = RandomHelper.genUrl
 	  
@@ -15,7 +15,7 @@ class HashStoreSpec extends FlatSpec {
 	}
 	
 	it should "throw an exception if a duplicate hash is added" in {
-	  val hash = HashStore.findNextAvailableHash
+	  val hash = AvailableHashManager.getNext
 	  
 	  val url1 = RandomHelper.genUrl
 	  
@@ -30,7 +30,7 @@ class HashStoreSpec extends FlatSpec {
 	}
 	
 	"findUrl" should "find a URL for a given hash url pair that was just added" in {
-	  val hash = HashStore.findNextAvailableHash
+	  val hash = AvailableHashManager.getNext
 	  
 	  val inputUrl = RandomHelper.genUrl
 	  
@@ -52,7 +52,7 @@ class HashStoreSpec extends FlatSpec {
 	}
 	
 	"findHash" should "locate the hash for a URL pair that was just added" in {
-	  val inputHash = HashStore.findNextAvailableHash
+	  val inputHash = AvailableHashManager.getNext
 	  
 	  val url = RandomHelper.genUrl
 	  

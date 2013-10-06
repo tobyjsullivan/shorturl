@@ -51,12 +51,12 @@ class ShortUrlSpec extends FlatSpec {
   it should "not produce two concecutive hashes which start with the same character" in {
     val hash1 = ShortUrl.hashUrl(RandomHelper.gen(8) + ".com")
     val hash2 = ShortUrl.hashUrl(RandomHelper.gen(8) + ".com")
-
+    
     assert(hash1.charAt(0) != hash2.charAt(0));
   }
 
   it should "produce a large number of hashes concurrently without failing" in {
-    val numThreads = 4000;
+    val numThreads = 1000;
     val active = new ArraySeq[Thread](numThreads)
 
     for (i <- 0 to (numThreads - 1)) {

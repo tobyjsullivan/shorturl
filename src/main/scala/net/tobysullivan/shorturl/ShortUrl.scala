@@ -32,15 +32,11 @@ object ShortUrl {
     } else {
       // If this url has not been hashed yet, create a new hash
 	  hashAsInt = AvailableHashManager.getNext()
-	  addUrlHashPairToMap(hashAsInt, url)
+	  HashStore.addHashUrlPair(hashAsInt, url)
     }
     
 	val hash = hashFromInt(hashAsInt)
 	hash
-  }
-  
-  private def addUrlHashPairToMap(hash: Int, url: String) {
-    HashStore.addHashUrlPair(hash, url)
   }
   
   private def reverseLookupUrlInMap(url: String): Future[Option[Int]] = {

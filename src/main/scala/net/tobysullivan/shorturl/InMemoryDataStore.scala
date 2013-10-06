@@ -11,12 +11,15 @@ object InMemoryDataStore extends HashStore with StatsStore {
       Math.max(max, pair._1)
     }
 
-    (maxHash + 1)
+    val nextHash = (maxHash + 1)
+    println("Next available hash: " + nextHash)
+    nextHash
   }
 
   def addHashUrlPair(hash: Int, url: String) {
     val existing = hashStore.get(hash)
-    if (existing.isDefined) {
+    if (existing.isDefined && existing.get != 0) {
+      println("Existing HASH: " + hash)
       throw new DuplicateHashException("The specified hash already exists")
     }
 

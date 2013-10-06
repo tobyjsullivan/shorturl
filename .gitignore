@@ -1,2 +1,4 @@
 .cache
 bin/*
+target/*
+project/target/*

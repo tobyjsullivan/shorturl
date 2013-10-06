@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS `tbl_urls` (
+	`hash` INT UNSIGNED NOT NULL,
+	`url` VARCHAR(255) NOT NULL,
+	PRIMARY KEY (`hash`),
+	UNIQUE KEY (`url`)
+);
+
+CREATE TABLE IF NOT EXISTS `tbl_clicks` (
+	`hash` INT UNSIGNED NOT NULL,
+	`count` INT UNSIGNED NOT NULL,
+	PRIMARY KEY (`hash`)
+);
