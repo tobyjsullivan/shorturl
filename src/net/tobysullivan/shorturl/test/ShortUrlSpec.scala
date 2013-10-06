@@ -1,11 +1,10 @@
 package net.tobysullivan.shorturl.test
 
+import scala.collection.mutable.ArraySeq
+
 import org.scalatest.FlatSpec
+
 import net.tobysullivan.shorturl.ShortUrl
-import scala.collection.mutable.ArraySeq
-import java.math.BigInteger
-import java.security.SecureRandom
-import scala.collection.mutable.ArraySeq
 
 class ShortUrlSpec extends FlatSpec {
   "CHAR_MAP" should "have 62 available characters" in {
@@ -140,14 +139,6 @@ class ShortUrlSpec extends FlatSpec {
     assert(clicks.isDefined)
     
     assert(clicks.get == numClicks)
-  }
-}
-
-object RandomStrings {
-  val random = new SecureRandom();
-
-  def gen(length: Int): String = {
-    new BigInteger(130, random).toString(32).substring(0, Math.min(length, 25));
   }
 }
 

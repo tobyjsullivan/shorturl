@@ -39,37 +39,26 @@ object ShortUrl {
 	hash
   }
   
-  private val hashToUrlMapAgent = Agent(HashMap[Int, String]())
   private def addUrlHashPairToMap(hash: Int, url: String) {
-    hashToUrlMapAgent send (_ + Tuple2(hash, url))
+    HashStore.addHashUrlPair(hash, url)
   }
   
   private def reverseLookupUrlInMap(url: String): Future[Option[Int]] = {
     future {
-      val map = Await.result(hashToUrlMapAgent.future, 2 seconds)
-      val hit = map.find(kv => { 
-        (kv._2 == url)
-      })
-      
-      if(hit.isDefined) {
-        Some(hit.get._1)
-      } else {
-        None
-      }
-      
+      HashStore.findHash(url)
     }
   }
 
   /**
    * This function returns a URL for the given hash. If the supplied hash does not exist
-   * in our records, a BadHashException is thrown. 
+   * in our records, a HashNotFoundException is thrown. 
    */
   def urlFromHash(hash: String): String = {
     val hashAsInt = intFromHash(hash)
     
     val possibleUrl = findUrlByHashInMap(hashAsInt)
     if(possibleUrl.isEmpty) {
-      throw new BadHashException("The hash does not exist in the index")
+      throw new HashNotFoundException("The hash does not exist in the index")
     }
     
     // Record hit for metrics
@@ -79,8 +68,7 @@ object ShortUrl {
   }
   
   private def findUrlByHashInMap(hash: Int): Option[String] = {
-    val map = Await.result(hashToUrlMapAgent.future, 1 second)
-    map.get(hash)
+    HashStore.findUrl(hash)
   }
   
   /**
@@ -170,6 +158,4 @@ object ShortUrl {
     // This could help if we opt to shard the DB.
     out.reverse
   }
-  
-  
 }
