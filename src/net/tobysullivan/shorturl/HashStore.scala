@@ -1,7 +1,9 @@
 package net.tobysullivan.shorturl
 
+import net.tobysullivan.shorturl.config.Configuration
+
 object HashStore {
-  private val implementation: HashStore = InMemoryDataStore
+  private val implementation: HashStore = Configuration.HASH_STORE
   
   def addHashUrlPair(hash: Int, url: String) {
     implementation.addHashUrlPair(hash, url)

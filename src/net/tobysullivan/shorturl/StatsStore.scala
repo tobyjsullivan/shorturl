@@ -1,7 +1,9 @@
 package net.tobysullivan.shorturl
 
+import net.tobysullivan.shorturl.config.Configuration
+
 object StatsStore {
-  val implementation: StatsStore = InMemoryDataStore
+  val implementation: StatsStore = Configuration.STATS_STORE
   
   def incrementHashLookupCount(hash: Int) {
     implementation.incrementHashLookupCount(hash)
