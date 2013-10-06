@@ -13,6 +13,9 @@ object ShortUrl {
   // The available characters for producing a hash. Per the spec, we use a base 62 set
   val CHAR_MAP = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     
+  /**
+   * Supported keys for statistics collections returned by statsFor(hash: String)
+   */
   val STATS_CLICKS = "clicks"
   
   /**
@@ -24,8 +27,10 @@ object ShortUrl {
     val possibleExisting = Await.result(reverseLookupUrlInMap(url), 2 seconds);
     var hashAsInt = 0;
     if(possibleExisting.isDefined) {
+      // If a hash for this url exists, return that
       hashAsInt = possibleExisting.get
     } else {
+      // If this url has not been hashed yet, create a new hash
 	  hashAsInt = getNextAvailableHash()
 	  addUrlHashPairToMap(hashAsInt, url)
     }
@@ -137,6 +142,10 @@ object ShortUrl {
     }
   }
   
+  /**
+   * All hashes are represented internally as integers. This function helps
+   * us convert from a user-friendly base 62 hash to an Integer
+   */
   private def intFromHash(hash: String): Int = {
     val mapSize = this.CHAR_MAP.size
     var out = 0
@@ -149,6 +158,11 @@ object ShortUrl {
     out
   }
   
+  
+  /**
+   * All hashes are represented internally as integers. This function helps
+   * us convert from a an Integer hash to a user-friendly base 62 hash
+   */
   private def hashFromInt(in: Int): String = {
     val mapSize = this.CHAR_MAP.size
     var i = in
