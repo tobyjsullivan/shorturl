@@ -1,7 +1,7 @@
 package net.tobysullivan.shorturl
 
 object HashStore {
-  private val implementation: HashStore = new InMemoryHashStore
+  private val implementation: HashStore = InMemoryDataStore
   
   def addHashUrlPair(hash: Int, url: String) {
     implementation.addHashUrlPair(hash, url)

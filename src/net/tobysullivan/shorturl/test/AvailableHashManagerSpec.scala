@@ -22,18 +22,11 @@ class AvailableHashManagerSpec extends FlatSpec {
     val numThreads = 1000;
     val active = new ArraySeq[Thread](numThreads)
     
-    var lastThread = System.currentTimeMillis()
     for(i <- 0 to (numThreads - 1)) {
-      // We want to create a lot of threads but limit to 1000/second to avoid memory issues.
-      if (numThreads > 1000 && lastThread == System.currentTimeMillis()) {
-    	  Thread.sleep(1)
-      }
       
       val thread = new Thread(new FreeHashGetter, "freehash-"+i)
       thread.start
       active.update(i, thread)
-      
-      lastThread = System.currentTimeMillis()
     }
     
     active.foreach(thread => thread.join())

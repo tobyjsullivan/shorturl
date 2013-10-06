@@ -24,7 +24,7 @@ object ShortUrl {
    */
   def hashUrl(url: String): String = {
     // Check for an existing hash to avoid putting in duplicates.
-    val possibleExisting = Await.result(reverseLookupUrlInMap(url), 2 seconds);
+    val possibleExisting = Await.result(reverseLookupUrlInMap(url), 30 seconds);
     var hashAsInt = 0;
     if(possibleExisting.isDefined) {
       // If a hash for this url exists, return that
@@ -62,7 +62,7 @@ object ShortUrl {
     }
     
     // Record hit for metrics
-    recordHashLookup(hashAsInt)
+    StatsStore.incrementHashLookupCount(hashAsInt)
     
     possibleUrl.get
   }
@@ -91,11 +91,6 @@ object ShortUrl {
       }
 	}
   }
-  
-  private val recordLookupAgent = Agent(HashMap[Int, Int]())
-  private def recordHashLookup(hash: Int) {
-    recordLookupAgent send (_ increment hash)
-  }
 
   /**
    * This function returns a collection of statistics for the given hash.
@@ -105,20 +100,7 @@ object ShortUrl {
   def statsFor(hash: String): Map[String, Any] = {
     val hashAsInt = intFromHash(hash)
     
-    Map[String, Any](STATS_CLICKS -> getClicksForHash(hashAsInt))
-  }
-  
-  private def getClicksForHash(hash: Int): Int = {
-    val lookupRecord = Await.result(recordLookupAgent.future, 2 seconds)
-    
-    val count = lookupRecord.get(hash)
-    
-    if(count.isEmpty) {
-      println("count for " + hashFromInt(hash) +  " not defined")
-      0
-    } else {
-      count.get
-    }
+    Map[String, Any](STATS_CLICKS -> StatsStore.getHashLookupCount(hashAsInt))
   }
   
   /**

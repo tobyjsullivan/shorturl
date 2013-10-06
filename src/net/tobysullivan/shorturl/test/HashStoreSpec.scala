@@ -9,7 +9,7 @@ class HashStoreSpec extends FlatSpec {
 	"addHashUrlPair" should "not fail to add a pair with a unique hash" in {
 	  val hash = HashStore.findNextAvailableHash
 	  
-	  val url = RandomStrings.genUrl
+	  val url = RandomHelper.genUrl
 	  
 	  HashStore.addHashUrlPair(hash, url)
 	}
@@ -17,9 +17,9 @@ class HashStoreSpec extends FlatSpec {
 	it should "throw an exception if a duplicate hash is added" in {
 	  val hash = HashStore.findNextAvailableHash
 	  
-	  val url1 = RandomStrings.genUrl
+	  val url1 = RandomHelper.genUrl
 	  
-	  val url2 = RandomStrings.genUrl
+	  val url2 = RandomHelper.genUrl
 	  
 	  HashStore.addHashUrlPair(hash, url1)
 	  
@@ -32,7 +32,7 @@ class HashStoreSpec extends FlatSpec {
 	"findUrl" should "find a URL for a given hash url pair that was just added" in {
 	  val hash = HashStore.findNextAvailableHash
 	  
-	  val inputUrl = RandomStrings.genUrl
+	  val inputUrl = RandomHelper.genUrl
 	  
 	  HashStore.addHashUrlPair(hash, inputUrl)
 	  
@@ -54,7 +54,7 @@ class HashStoreSpec extends FlatSpec {
 	"findHash" should "locate the hash for a URL pair that was just added" in {
 	  val inputHash = HashStore.findNextAvailableHash
 	  
-	  val url = RandomStrings.genUrl
+	  val url = RandomHelper.genUrl
 	  
 	  HashStore.addHashUrlPair(inputHash, url)
 	  
