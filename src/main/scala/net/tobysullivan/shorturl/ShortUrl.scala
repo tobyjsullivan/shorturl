@@ -19,14 +19,12 @@ object ShortUrl {
 }
 
 class ShortUrl(hashStore: HashStore, statsStore: StatsStore) {
-  implicit private val user_hash_store = hashStore
-  implicit private val user_stats_store = statsStore
   
   /**
    * The available hash manager provides an in-memory mechanism for finding what the next
    * available hash is. It only reads from the database once to initialize.
    */
-  private def hashManager = new AvailableHashManager
+  private def hashManager = new AvailableHashManager(hashStore)
   
   /**
    * This function takes a URL as a string, produces a hash unique to that URL and returns it.
@@ -42,7 +40,7 @@ class ShortUrl(hashStore: HashStore, statsStore: StatsStore) {
     } else {
       // If this url has not been hashed yet, create a new hash
 	  hashAsInt = hashManager.getNext()
-	  HashStore.addHashUrlPair(hashAsInt, url)
+	  hashStore.addHashUrlPair(hashAsInt, url)
     }
     
 	val hash = hashFromInt(hashAsInt)
@@ -51,7 +49,7 @@ class ShortUrl(hashStore: HashStore, statsStore: StatsStore) {
   
   private def reverseLookupUrlInMap(url: String): Future[Option[Int]] = {
     future {
-      HashStore.findHash(url)
+      hashStore.findHash(url)
     }
   }
 
@@ -68,13 +66,13 @@ class ShortUrl(hashStore: HashStore, statsStore: StatsStore) {
     }
     
     // Record hit for metrics
-    StatsStore.incrementHashLookupCount(hashAsInt)
+    statsStore.incrementHashLookupCount(hashAsInt)
     
     possibleUrl.get
   }
   
   private def findUrlByHashInMap(hash: Int): Option[String] = {
-    HashStore.findUrl(hash)
+    hashStore.findUrl(hash)
   }
   
   /**
@@ -106,7 +104,7 @@ class ShortUrl(hashStore: HashStore, statsStore: StatsStore) {
   def statsFor(hash: String): Map[String, Any] = {
     val hashAsInt = intFromHash(hash)
     
-    Map[String, Any](ShortUrl.STATS_CLICKS -> StatsStore.getHashLookupCount(hashAsInt))
+    Map[String, Any](ShortUrl.STATS_CLICKS -> statsStore.getHashLookupCount(hashAsInt))
   }
   
   /**

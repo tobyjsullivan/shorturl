@@ -11,13 +11,13 @@ class StatsStoreSpec extends FlatSpec {
   "incrementHashLookupCount" should "not fail when provided valid data" in {
     val hash = 283 // arbitrary
     
-    StatsStore.incrementHashLookupCount(hash)(fixture.statsStore)
+    fixture.statsStore.incrementHashLookupCount(hash)
   }
   
   "getHashLookupCount" should "return zero for a new hash" in {
     val hash = 20000000 + RandomHelper.genInt(10000)
     
-    val count = StatsStore.getHashLookupCount(hash)(fixture.statsStore)
+    val count = fixture.statsStore.getHashLookupCount(hash)
     
     assert(count == 0)
   }
@@ -27,10 +27,10 @@ class StatsStoreSpec extends FlatSpec {
     val numIncrements = 395
     
     for(i <- 1 to numIncrements) {
-      StatsStore.incrementHashLookupCount(hash)(fixture.statsStore)
+      fixture.statsStore.incrementHashLookupCount(hash)
     }
     
-    val count = StatsStore.getHashLookupCount(hash)(fixture.statsStore)
+    val count = fixture.statsStore.getHashLookupCount(hash)
     
     assert(count == numIncrements)
   }

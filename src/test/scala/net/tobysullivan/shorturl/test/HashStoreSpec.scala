@@ -9,7 +9,7 @@ class HashStoreSpec extends FlatSpec {
   def fixture =
     new {
       val hashStore = Configuration.HASH_STORE
-      val hashManager = new AvailableHashManager()(hashStore)
+      val hashManager = new AvailableHashManager(hashStore)
     }
 
   "addHashUrlPair" should "not fail to add a pair with a unique hash" in {
@@ -17,7 +17,7 @@ class HashStoreSpec extends FlatSpec {
 
     val url = RandomHelper.genUrl
 
-    HashStore.addHashUrlPair(hash, url)(fixture.hashStore)
+    fixture.hashStore.addHashUrlPair(hash, url)
   }
 
   "findUrl" should "find a URL for a given hash url pair that was just added" in {
@@ -25,9 +25,9 @@ class HashStoreSpec extends FlatSpec {
 
     val inputUrl = RandomHelper.genUrl
 
-    HashStore.addHashUrlPair(hash, inputUrl)(fixture.hashStore)
+    fixture.hashStore.addHashUrlPair(hash, inputUrl)
 
-    val foundUrl = HashStore.findUrl(hash)(fixture.hashStore)
+    val foundUrl = fixture.hashStore.findUrl(hash)
 
     assert(foundUrl.isDefined)
 
@@ -35,7 +35,7 @@ class HashStoreSpec extends FlatSpec {
   }
 
   it should "return None for a hash that was never added" in {
-    val url = HashStore.findUrl(Int.MaxValue - 1)(fixture.hashStore)
+    val url = fixture.hashStore.findUrl(Int.MaxValue - 1)
 
     assert(url.isEmpty)
 
@@ -47,9 +47,9 @@ class HashStoreSpec extends FlatSpec {
 
     val url = RandomHelper.genUrl
 
-    HashStore.addHashUrlPair(inputHash, url)(fixture.hashStore)
+    fixture.hashStore.addHashUrlPair(inputHash, url)
 
-    val foundHash = HashStore.findHash(url)(fixture.hashStore)
+    val foundHash = fixture.hashStore.findHash(url)
 
     assert(foundHash.isDefined)
 
@@ -57,7 +57,7 @@ class HashStoreSpec extends FlatSpec {
   }
 
   it should "return None for a url that was never added" in {
-    val hash = HashStore.findHash("thisurlmustneverbeadded")(fixture.hashStore)
+    val hash = fixture.hashStore.findHash("thisurlmustneverbeadded")
 
     assert(hash.isEmpty)
 

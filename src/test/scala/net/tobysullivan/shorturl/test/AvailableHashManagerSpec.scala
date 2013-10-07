@@ -8,7 +8,7 @@ import net.tobysullivan.shorturl.AvailableHashManager
 class AvailableHashManagerSpec extends FlatSpec {
   def fixture =
     new {
-      val hashManager = new AvailableHashManager()(Configuration.HASH_STORE)
+      val hashManager = new AvailableHashManager(Configuration.HASH_STORE)
     }
   
   "getNext" should "produce a unique, larger value every time" in {
