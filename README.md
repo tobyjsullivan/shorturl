@@ -26,6 +26,8 @@ Using MySQL
 The ShortUrl class requires a data store connector for initialisation. A MySQL connector is included. This is how you would use the
 included vagrant mysql instance:
 
+	import net.tobysullivan.shorturl._
+
 	var mysql = new MySqlDataStore("192.168.33.10", "root", "root", "shorturl") // Only the database and user need to be defined. Tables are created automatically. 
 	
 	var shorturl = new ShortUrl(mysql, mysql) // Note that the datastore is supplied twice. 
