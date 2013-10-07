@@ -1,6 +1,6 @@
-.cache
-bin/*
-target/*
-project/target/*
+/.cache
+/bin/*
+/target/*
+/project/target/*
 .DS_Store
-
+/vagrant/.vagrant/*

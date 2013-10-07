@@ -11,7 +11,7 @@ class StatsStoreSpec extends FlatSpec {
   }
   
   "getHashLookupCount" should "return zero for a new hash" in {
-    val hash = RandomHelper.genInt(10000)
+    val hash = 20000000 + RandomHelper.genInt(10000)
     
     val count = StatsStore.getHashLookupCount(hash)
     
@@ -19,7 +19,7 @@ class StatsStoreSpec extends FlatSpec {
   }
   
   "getHashLookupCount" should "return the correct number of increments for a hash" in {
-    val hash = RandomHelper.genInt(10000)
+    val hash = 10000000 + RandomHelper.genInt(10000)
     val numIncrements = 395
     
     for(i <- 1 to numIncrements) {
