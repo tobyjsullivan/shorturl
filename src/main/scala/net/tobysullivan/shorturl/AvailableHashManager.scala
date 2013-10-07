@@ -15,6 +15,6 @@ object AvailableHashManager {
   private val cursor = Agent(HashStore.findNextAvailableHash)
   def getNext(): Int = {
     val future = cursor alter (_ + 1)
-    Await.result(future, 1 second)
+    Await.result(future, 30 second)
   }
 }

@@ -107,7 +107,7 @@ object ShortUrl {
     val mapSize = this.CHAR_MAP.size
     var out = 0
     
-    for(curChar <- hash.toCharArray()) {
+    for(curChar <- hash.reverse.toCharArray()) {
       out *= mapSize
       out += this.CHAR_MAP.indexOf(curChar)
     }
@@ -130,10 +130,6 @@ object ShortUrl {
       i /= mapSize
     }
     
-    // We could reverse the hash in either this function or the intFromHash(String) function.
-    // We choose to do it here to offer a decent distribution of hashes. E.i., they will be 
-    // produced in the order {..., aa, ba, ca, da, ...}.
-    // This could help if we opt to shard the DB.
-    out.reverse
+    out
   }
 }

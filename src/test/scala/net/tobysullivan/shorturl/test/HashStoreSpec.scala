@@ -23,7 +23,7 @@ class HashStoreSpec extends FlatSpec {
 	  
 	  HashStore.addHashUrlPair(hash, url1)
 	  
-	  intercept[DuplicateHashException] {
+	  intercept[Exception] {
 	    HashStore.addHashUrlPair(hash, url2)
 	  }
 	  

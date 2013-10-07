@@ -19,7 +19,7 @@ class AvailableHashManagerSpec extends FlatSpec {
   }
   
   it should "not trip up with many threads executing" in {
-    val numThreads = 1000;
+    val numThreads = 2500;
     val active = new ArraySeq[Thread](numThreads)
     
     for(i <- 0 to (numThreads - 1)) {

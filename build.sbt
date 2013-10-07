@@ -9,3 +9,5 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.2.1"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-agent" % "2.2.1"
+
+libraryDependencies += "com.typesafe.slick" %% "slick" % "1.0.1"

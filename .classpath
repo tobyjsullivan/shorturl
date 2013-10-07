@@ -35,5 +35,7 @@
 	<classpathentry kind="lib" path="lib/akka/slf4j-api-1.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/akka/uncommons-maths-1.2.2a.jar"/>
 	<classpathentry kind="lib" path="lib/akka/zeromq-scala-binding_2.10-0.0.7.jar"/>
+	<classpathentry kind="lib" path="lib/slick_2.10.1-2.0.0-M1.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.26-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

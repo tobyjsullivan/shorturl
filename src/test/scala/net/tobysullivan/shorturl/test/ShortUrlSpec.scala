@@ -24,7 +24,7 @@ class ShortUrlSpec extends FlatSpec {
   }
 
   "hashUrl" should "produce a hash from valid url" in {
-    val inputUrl = "google.com"
+    val inputUrl = RandomHelper.genUrl
 
     val hash = ShortUrl.hashUrl(inputUrl)
 
@@ -33,14 +33,14 @@ class ShortUrlSpec extends FlatSpec {
   }
 
   it should "return distinct hashes for distinct urls" in {
-    val hash1 = ShortUrl.hashUrl("domain1.com")
-    val hash2 = ShortUrl.hashUrl("domain2.com")
+    val hash1 = ShortUrl.hashUrl(RandomHelper.genUrl)
+    val hash2 = ShortUrl.hashUrl(RandomHelper.genUrl)
 
     assert(hash1 != hash2)
   }
 
   it should "return the same hash for duplicate urls" in {
-    val inputUrl = "example.com"
+    val inputUrl = RandomHelper.genUrl
 
     val hash1 = ShortUrl.hashUrl(inputUrl)
     val hash2 = ShortUrl.hashUrl(inputUrl)
@@ -56,7 +56,7 @@ class ShortUrlSpec extends FlatSpec {
   }
 
   it should "produce a large number of hashes concurrently without failing" in {
-    val numThreads = 1000;
+    val numThreads = 5;
     val active = new ArraySeq[Thread](numThreads)
 
     for (i <- 0 to (numThreads - 1)) {
@@ -76,11 +76,12 @@ class ShortUrlSpec extends FlatSpec {
 
       val retVal = ShortUrl.urlFromHash(hash)
 
+      
       assert(retVal == inputUrl)
     }
   }
 
-  "urlFromHash" should "produce the original url" in {
+  it should "produce the original url" in {
 
     val inputUrl = "http://" + RandomHelper.gen(8) + ".com/some/path/" + RandomHelper.gen(10)
 
@@ -91,7 +92,7 @@ class ShortUrlSpec extends FlatSpec {
   }
 
   it should "round-trip a large number of hashes concurrently without failing" in {
-    val numThreads = 1000;
+    val numThreads = 5;
     val active = new ArraySeq[Thread](numThreads)
 
     for (i <- 0 to (numThreads - 1)) {
