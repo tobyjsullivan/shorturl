@@ -75,14 +75,6 @@ case class MySqlDataStore(hostname: String, username: String, password: String, 
 
   def findNextAvailableHash(): Int = {
     db.withSession {
-//      val max = Query(Urls.map(_.hash).max).first
-//
-//      if (max.isEmpty) {
-//        1
-//      } else {
-//        max.get + 1
-//      }
-
       // Reserve and retrieve the next hash
       val newHash = Urls.autoInc.insert(value = null)
       newHash
