@@ -1,7 +1,7 @@
 include_recipe "mysql::server"
 
 execute "generate input file" do
-  command "echo \"CREATE DATABASE IF NOT EXISTS shorturl;\nGRANT *.* \" > databases.sql"
+  command "echo \"CREATE DATABASE IF NOT EXISTS shorturl;\" > databases.sql"
 end
 
 execute "create database" do
