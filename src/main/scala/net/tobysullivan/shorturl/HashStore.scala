@@ -1,24 +1,20 @@
 package net.tobysullivan.shorturl
 
-import net.tobysullivan.shorturl.config.Configuration
-
 object HashStore {
-  private val implementation: HashStore = Configuration.HASH_STORE
-  
-  def addHashUrlPair(hash: Int, url: String) {
-    implementation.addHashUrlPair(hash, url)
+  def addHashUrlPair(hash: Int, url: String)(implicit hashStore: HashStore) {
+    hashStore.addHashUrlPair(hash, url)
   }
 
-  def findUrl(hash: Int): Option[String] = {
-    implementation.findUrl(hash)
+  def findUrl(hash: Int)(implicit hashStore: HashStore): Option[String] = {
+    hashStore.findUrl(hash)
   }
 
-  def findHash(url: String): Option[Int] = {
-    implementation.findHash(url)
+  def findHash(url: String)(implicit hashStore: HashStore): Option[Int] = {
+    hashStore.findHash(url)
   }
 
-  def findNextAvailableHash(): Int = {
-    implementation.findNextAvailableHash
+  def findNextAvailableHash()(implicit hashStore: HashStore): Int = {
+    hashStore.findNextAvailableHash
   }
 }
 

@@ -20,14 +20,16 @@ Getting Started
 The easiest way to initialise the environment is simply to use the ./unittest script. This will launch a local MySQL Server VM using vagrant,
 run the SBT install (including installing all requirements) and execute the unit tests. 
 
-The library itself is contained in the net.tobysullivan.shorturl.ShortUrl singleton object which exposes three public functions.
+The ShortUrl class requires a data store connector for initialisation. A MySQL connector is included. This is how you would use the
+included vagrant mysql instance:
 
-	# net.tobysullivan.shorturl.ShortUrl
-	def hashUrl(url: String): String
+	var mysql = new MySqlDataStore("192.168.33.10", "root", "root", "shorturl")
 	
-	def urlFromHash(hash: String): String
+	var shorturl = new ShortUrl(mysql, mysql) // Not that the datastore is supplied twice
 	
-	def statsFor(hash: String): Map[String, Any]
+	var hash = shorturl.hashUrl("http://www.google.com")
+	
+	var url = shorturl.urlFromHash(hash)
 
 Alternative DB's
 ---

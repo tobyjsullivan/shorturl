@@ -8,15 +8,25 @@ import scala.concurrent.Future
 import scala.concurrent._
 import scala.collection.immutable.HashMap
 
-
 object ShortUrl {
   // The available characters for producing a hash. Per the spec, we use a base 62 set
   val CHAR_MAP = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     
   /**
-   * Supported keys for statistics collections returned by statsFor(hash: String)
+   * Supported keys for statistics collections returned by ShortUrl.statsFor(hash: String): Map[String, Any]
    */
   val STATS_CLICKS = "clicks"
+}
+
+class ShortUrl(hashStore: HashStore, statsStore: StatsStore) {
+  implicit private val user_hash_store = hashStore
+  implicit private val user_stats_store = statsStore
+  
+  /**
+   * The available hash manager provides an in-memory mechanism for finding what the next
+   * available hash is. It only reads from the database once to initialize.
+   */
+  private def hashManager = new AvailableHashManager
   
   /**
    * This function takes a URL as a string, produces a hash unique to that URL and returns it.
@@ -31,7 +41,7 @@ object ShortUrl {
       hashAsInt = possibleExisting.get
     } else {
       // If this url has not been hashed yet, create a new hash
-	  hashAsInt = AvailableHashManager.getNext()
+	  hashAsInt = hashManager.getNext()
 	  HashStore.addHashUrlPair(hashAsInt, url)
     }
     
@@ -96,7 +106,7 @@ object ShortUrl {
   def statsFor(hash: String): Map[String, Any] = {
     val hashAsInt = intFromHash(hash)
     
-    Map[String, Any](STATS_CLICKS -> StatsStore.getHashLookupCount(hashAsInt))
+    Map[String, Any](ShortUrl.STATS_CLICKS -> StatsStore.getHashLookupCount(hashAsInt))
   }
   
   /**
@@ -104,12 +114,12 @@ object ShortUrl {
    * us convert from a user-friendly base 62 hash to an Integer
    */
   private def intFromHash(hash: String): Int = {
-    val mapSize = this.CHAR_MAP.size
+    val mapSize = ShortUrl.CHAR_MAP.size
     var out = 0
     
     for(curChar <- hash.reverse.toCharArray()) {
       out *= mapSize
-      out += this.CHAR_MAP.indexOf(curChar)
+      out += ShortUrl.CHAR_MAP.indexOf(curChar)
     }
     
     out
@@ -121,12 +131,12 @@ object ShortUrl {
    * us convert from a an Integer hash to a user-friendly base 62 hash
    */
   private def hashFromInt(in: Int): String = {
-    val mapSize = this.CHAR_MAP.size
+    val mapSize = ShortUrl.CHAR_MAP.size
     var i = in
     var out = ""
     
     while(i > 0) {
-      out += this.CHAR_MAP.charAt(i % mapSize)
+      out += ShortUrl.CHAR_MAP.charAt(i % mapSize)
       i /= mapSize
     }
     

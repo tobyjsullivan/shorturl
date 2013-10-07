@@ -1,4 +1,4 @@
-package net.tobysullivan.shorturl.config
+package net.tobysullivan.shorturl.test
 
 import net.tobysullivan.shorturl._
 

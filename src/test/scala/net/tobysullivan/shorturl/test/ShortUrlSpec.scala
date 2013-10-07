@@ -7,12 +7,18 @@ import org.scalatest.FlatSpec
 import net.tobysullivan.shorturl.ShortUrl
 
 class ShortUrlSpec extends FlatSpec {
+  def fixture =
+    new {
+      val shorturl = new ShortUrl(Configuration.HASH_STORE, Configuration.STATS_STORE)
+    }
+  
   "CHAR_MAP" should "have 62 available characters" in {
     val mapSize = ShortUrl.CHAR_MAP.length()
     assert(mapSize == 62)
   }
 
   it should "not have any duplicate characters" in {
+    val shorturl = fixture.shorturl
     val soFar = new ArraySeq[Char](ShortUrl.CHAR_MAP.length())
 
     var idx = 0
@@ -26,31 +32,37 @@ class ShortUrlSpec extends FlatSpec {
   "hashUrl" should "produce a hash from valid url" in {
     val inputUrl = RandomHelper.genUrl
 
-    val hash = ShortUrl.hashUrl(inputUrl)
+    val hash = fixture.shorturl.hashUrl(inputUrl)
 
     assert(hash.length > 0)
     assert(hash != inputUrl)
   }
 
   it should "return distinct hashes for distinct urls" in {
-    val hash1 = ShortUrl.hashUrl(RandomHelper.genUrl)
-    val hash2 = ShortUrl.hashUrl(RandomHelper.genUrl)
+    val shorturl = fixture.shorturl
+    
+    val hash1 = shorturl.hashUrl(RandomHelper.genUrl)
+    val hash2 = shorturl.hashUrl(RandomHelper.genUrl)
 
     assert(hash1 != hash2)
   }
 
   it should "return the same hash for duplicate urls" in {
+    val shorturl = fixture.shorturl
+    
     val inputUrl = RandomHelper.genUrl
 
-    val hash1 = ShortUrl.hashUrl(inputUrl)
-    val hash2 = ShortUrl.hashUrl(inputUrl)
+    val hash1 = shorturl.hashUrl(inputUrl)
+    val hash2 = shorturl.hashUrl(inputUrl)
 
     assert(hash1 == hash2)
   }
 
   it should "not produce two concecutive hashes which start with the same character" in {
-    val hash1 = ShortUrl.hashUrl(RandomHelper.gen(8) + ".com")
-    val hash2 = ShortUrl.hashUrl(RandomHelper.gen(8) + ".com")
+    val shorturl = fixture.shorturl
+    
+    val hash1 = shorturl.hashUrl(RandomHelper.gen(8) + ".com")
+    val hash2 = shorturl.hashUrl(RandomHelper.gen(8) + ".com")
     
     assert(hash1.charAt(0) != hash2.charAt(0));
   }
@@ -60,7 +72,7 @@ class ShortUrlSpec extends FlatSpec {
     val active = new ArraySeq[Thread](numThreads)
 
     for (i <- 0 to (numThreads - 1)) {
-      val thread = new Thread(new HashCreator, "create-" + i)
+      val thread = new Thread(new HashCreator(fixture.shorturl), "create-" + i)
       thread.start
       active.update(i, thread)
     }
@@ -69,12 +81,14 @@ class ShortUrlSpec extends FlatSpec {
   }
 
   "urlFromHash" should "produce the original url many times" in {
+    val shorturl = fixture.shorturl
+    
     for (i <- 1 to 1000) {
       val inputUrl = "http://" + RandomHelper.gen(8) + ".com"
 
-      val hash = ShortUrl.hashUrl(inputUrl)
+      val hash = shorturl.hashUrl(inputUrl)
 
-      val retVal = ShortUrl.urlFromHash(hash)
+      val retVal = shorturl.urlFromHash(hash)
 
       
       assert(retVal == inputUrl)
@@ -82,12 +96,13 @@ class ShortUrlSpec extends FlatSpec {
   }
 
   it should "produce the original url" in {
+    val shorturl = fixture.shorturl
 
     val inputUrl = "http://" + RandomHelper.gen(8) + ".com/some/path/" + RandomHelper.gen(10)
 
-    val hash = ShortUrl.hashUrl(inputUrl)
+    val hash = shorturl.hashUrl(inputUrl)
 
-    val retVal = ShortUrl.urlFromHash(hash)
+    val retVal = shorturl.urlFromHash(hash)
     assert(retVal == inputUrl)
   }
 
@@ -97,7 +112,7 @@ class ShortUrlSpec extends FlatSpec {
 
     for (i <- 0 to (numThreads - 1)) {
 
-      val thread = new Thread(new HashRoundTripper, "roundtrip-" + i)
+      val thread = new Thread(new HashRoundTripper(fixture.shorturl), "roundtrip-" + i)
       thread.start
       active.update(i, thread)
     }
@@ -106,9 +121,11 @@ class ShortUrlSpec extends FlatSpec {
   }
 
   "statsFor" should "return 0 clicks on a new hash" in {
-    val hash = ShortUrl.hashUrl("http://www." + RandomHelper.gen(8) + ".net/")
+    val shorturl = fixture.shorturl
+    
+    val hash = shorturl.hashUrl("http://www." + RandomHelper.gen(8) + ".net/")
 
-    val stats = ShortUrl.statsFor(hash)
+    val stats = shorturl.statsFor(hash)
 
     val clicks = stats.get(ShortUrl.STATS_CLICKS)
 
@@ -118,15 +135,17 @@ class ShortUrlSpec extends FlatSpec {
   }
 
   "statsFor" should "return correct number of clicks for a hash" in {
-    val hash = ShortUrl.hashUrl("http://www." + RandomHelper.gen(8) + ".biz")
+    val shorturl = fixture.shorturl
+    
+    val hash = shorturl.hashUrl("http://www." + RandomHelper.gen(8) + ".biz")
 
     // Click/lookup several times
     val numClicks = 25
     for (i <- 1 to numClicks) {
-      val throwAway = ShortUrl.urlFromHash(hash)
+      val throwAway = shorturl.urlFromHash(hash)
     }
 
-    val stats = ShortUrl.statsFor(hash)
+    val stats = shorturl.statsFor(hash)
 
     val clicks = stats.get(ShortUrl.STATS_CLICKS)
 
@@ -136,21 +155,21 @@ class ShortUrlSpec extends FlatSpec {
   }
 }
 
-class HashCreator extends Runnable {
+class HashCreator(shorturl: ShortUrl) extends Runnable {
   def run {
-    val hash = ShortUrl.hashUrl(RandomHelper.gen(14) + ".net")
+    val hash = shorturl.hashUrl(RandomHelper.gen(14) + ".net")
 
     assert(hash.length() > 0)
   }
 }
 
-class HashRoundTripper extends Runnable {
+class HashRoundTripper(shorturl: ShortUrl) extends Runnable {
   def run {
     val inputUrl = "http://" + RandomHelper.gen(14) + ".org"
 
-    val hash = ShortUrl.hashUrl(inputUrl)
+    val hash = shorturl.hashUrl(inputUrl)
 
-    val resultUrl = ShortUrl.urlFromHash(hash)
+    val resultUrl = shorturl.urlFromHash(hash)
 
     assert(inputUrl == resultUrl)
   }
