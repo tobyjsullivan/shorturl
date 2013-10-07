@@ -56,7 +56,7 @@ class ShortUrlSpec extends FlatSpec {
   }
 
   it should "produce a large number of hashes concurrently without failing" in {
-    val numThreads = 1000;
+    val numThreads = 100;
     val active = new ArraySeq[Thread](numThreads)
 
     for (i <- 0 to (numThreads - 1)) {
@@ -92,7 +92,7 @@ class ShortUrlSpec extends FlatSpec {
   }
 
   it should "round-trip a large number of hashes concurrently without failing" in {
-    val numThreads = 1000;
+    val numThreads = 100;
     val active = new ArraySeq[Thread](numThreads)
 
     for (i <- 0 to (numThreads - 1)) {
