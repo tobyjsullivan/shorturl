@@ -70,7 +70,7 @@ object ShortUrl {
   /**
    * We use this implicit conversion to help us increment record lookups 
    */ 
-  implicit def LookupRecordMapWrapper(m: HashMap[Int, Int]) = new HashMap[Int, Int] {
+  implicit private def LookupRecordMapWrapper(m: HashMap[Int, Int]) = new HashMap[Int, Int] {
     def increment(key: Int): HashMap[Int, Int] = {
       if(!m.contains(key)) {
         // This hash has never been looked up before
