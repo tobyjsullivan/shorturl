@@ -67,7 +67,8 @@ class ShortUrlSpec extends FlatSpec {
     assert(hash1.charAt(0) != hash2.charAt(0));
   }
 
-  it should "produce a large number of hashes concurrently without failing" in {
+  // For simplicity, we are ignoring tests of threads by default.
+  ignore should "produce a large number of hashes concurrently without failing" in {
     val numThreads = 100;
     val active = new ArraySeq[Thread](numThreads)
 
@@ -106,7 +107,8 @@ class ShortUrlSpec extends FlatSpec {
     assert(retVal == inputUrl)
   }
 
-  it should "round-trip a large number of hashes concurrently without failing" in {
+  // For simplicity, we are ignoring tests of threads by default.
+  ignore should "round-trip a large number of hashes concurrently without failing" in {
     val numThreads = 100;
     val active = new ArraySeq[Thread](numThreads)
 

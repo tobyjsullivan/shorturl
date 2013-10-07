@@ -25,7 +25,8 @@ class AvailableHashManagerSpec extends FlatSpec {
     }
   }
   
-  it should "not trip up with many threads executing" in {
+  // For simplicity, we are ignoring tests of threads by default.
+  ignore should "not trip up with many threads executing" in {
     val numThreads = 100;
     val active = new ArraySeq[Thread](numThreads)
     
